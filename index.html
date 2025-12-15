@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Art Numérique Interactif</title>
+<style>
+  body { margin:0; overflow:hidden; background:black; }
+  canvas { display:block; }
+</style>
+</head>
+<body>
+<canvas id="art"></canvas>
+<script>
+const canvas = document.getElementById('art');
+const ctx = canvas.getContext('2d');
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
+
+// Suivi de la souris
+let mouse = { x: width/2, y: height/2 };
+document.addEventListener('mousemove', e => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+});
+
+// Particules
+const particles = [];
+const particleCount = 200;
+
+for(let i=0;i<particleCount;i++){
+  particles.push({
+    x: Math.random()*width,
+    y: Math.random()*height,
+    size: Math.random()*3+1,
+    dx: (Math.random()-0.5)*2,
+    dy: (Math.random()-0.5)*2,
+    hue: Math.random()*360
+  });
+}
+
+function animate(){
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.fillRect(0,0,width,height);
+
+  particles.forEach(p=>{
+    p.x += p.dx;
+    p.y += p.dy;
+
+    // Bouger vers la souris
+    let ax = (mouse.x - p.x)*0.001;
+    let ay = (mouse.y - p.y)*0.001;
+    p.dx += ax;
+    p.dy += ay;
+
+    // Rebond murs
+    if(p.x<0||p.x>width) p.dx*=-1;
+    if(p.y<0||p.y>height) p.dy*=-1;
+
+    // Dessin
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+    ctx.fillStyle = `hsl(${p.hue},100%,50%)`;
+    ctx.fill();
+
+    p.hue += 0.5;
+    if(p.hue>360) p.hue=0;
+  });
+
+  requestAnimationFrame(animate);
+}
+
+// Resize
+window.addEventListener('resize', ()=>{
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+});
+
+animate();
+</script>
+</body>
+</html>
